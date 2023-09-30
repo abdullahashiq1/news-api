@@ -1,5 +1,5 @@
 const apiKey = `c9da55fe1618434db7986c0669bfa975`;
-let articles = [];
+let articles = [];  // store the fetched news articles
 
 const fetchDataFromAPI = async () => {
     const url = `https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=${apiKey}`;
@@ -9,17 +9,38 @@ const fetchDataFromAPI = async () => {
             throw new Error('Network response was not ok');
         }
         const data = await res.json();
-        displayNews(data.articles)
+        articles = data.articles    // sorting store
+        shuffleAndDisplayArticles();
+        // displayNews(articles)
     } catch (error) {
         console.error('Error:', error.message);
         return [];
     }
 };
 
-const displayNews = (allNews) =>{
-   
+const shuffleAndDisplayArticles = () =>{
+    shuffleArticles();  // shuffle the articles
+    displayNews(articles)   // display the shuffled articles
 
+}
+
+const shuffleArticles = () =>{
+    for(let i = articles.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [articles[i], articles[j]] = [articles[j], articles[i]]
+    }
+}
+
+const sortByDateBtn = document.getElementById('sorting-date');
+    sortByDateBtn.addEventListener('click', ()=>{
+        articles.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+        displayNews(articles)
+})
+
+const displayNews = (allNews) =>{
     const container = document.getElementById('news-container');
+    container.innerHTML = '';   //clear previous content
+
     allNews.forEach((news, index) =>{
         console.log(news)
         // || index ===1 || index === 2
@@ -32,7 +53,6 @@ const displayNews = (allNews) =>{
         }  else{
             div.classList.add('col-sm-4')
         }
-
         
         // overlay text on image 
         div.innerHTML = `
@@ -58,4 +78,5 @@ const displayNews = (allNews) =>{
     })
 }
 
-fetchDataFromAPI()
+// trigger the loading of news
+fetchDataFromAPI();
